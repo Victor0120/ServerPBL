@@ -1,0 +1,24 @@
+farm==0.4.9
+--find-links=https://download.pytorch.org/whl/torch_stable.html
+fastapi
+uvicorn
+gunicorn
+pandas
+sklearn
+psycopg2-binary; sys_platform != 'win32' and sys_platform != 'cygwin'
+elasticsearch
+elastic-apm
+tox
+coverage
+langdetect # for PDF conversions
+# optional: sentence-transformers
+python-multipart
+python-docx
+sqlalchemy_utils
+# for using FAISS with GPUs, install faiss-gpu
+faiss-cpu; sys_platform != 'win32' and sys_platform != 'cygwin'
+tika
+uvloop; sys_platform != 'win32' and sys_platform != 'cygwin'
+httptools
+nltk
+more_itertools
