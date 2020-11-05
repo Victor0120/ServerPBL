@@ -10,18 +10,23 @@ FROM_EMAIL = 'beepboop.faf@gmail.com'
 
 TEMPLATE_ID = 'd-6b6d8549c1774c7688d71520cbb9136b'
 
-@auth.route('/')
+@auth.route('/', methods=['POST'])
 def postEmail(): 
-  email = request.args.get('email')
+  if request.method == 'POST':
+    return sendEmailMessage()
+
+
+def sendEmailMessage():
+  email = request.json['email']
 
   # create Mail object
   message = Mail(
-        from_email=FROM_EMAIL,
-        to_emails=[email])
+          from_email=FROM_EMAIL,
+          to_emails=[email])
 
   # pass custom values for HTML placeholders
   message.dynamic_template_data = {
-      'verification_code': 123456
+    'verification_code': 123456
   }
 
   message.template_id = TEMPLATE_ID
@@ -32,4 +37,5 @@ def postEmail():
 
   except Exception as e:
     print("Error: {0}".format(e))
+
   return str(response.status_code)
