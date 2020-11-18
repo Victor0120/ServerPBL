@@ -8,7 +8,7 @@ import auth
 def create_app():
 	app = Flask(__name__)
 
-	load_dotenv('.env')
+	load_dotenv('./.env')
 	CORS(app)
 
 	app.register_blueprint(auth.auth)

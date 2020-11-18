@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from os import environ
+from random import randint
 
 from sendgrid.helpers.mail import Mail
 from sendgrid import SendGridAPIClient
@@ -25,9 +26,11 @@ def sendEmailMessage():
   # create Mail object
   message = Mail(from_email=FROM_EMAIL, to_emails=[email])
 
+  VERIFICATION_CODE = randint(100000, 999999)
+
   # pass custom values for HTML placeholders
   message.dynamic_template_data = {
-    'verification_code': 123456
+    'verification_code': VERIFICATION_CODE
   }
 
   message.template_id = environ.get('MESSAGE_TEMPLATE_ID')
@@ -39,7 +42,7 @@ def sendEmailMessage():
 
     codeList.append({
       "email": email,
-      "code": 123456
+      "code": VERIFICATION_CODE
     })
 
     timer = Timer(TIME_CODE_IS_VALID, deleteCode, [email])
