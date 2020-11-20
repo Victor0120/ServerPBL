@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from os import environ
 from random import randint
 
@@ -6,6 +6,8 @@ from sendgrid.helpers.mail import Mail
 from sendgrid import SendGridAPIClient
 
 from threading import Timer
+
+from flask_jwt_extended import create_access_token
 
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -63,10 +65,11 @@ def deleteCode(email):
 def postCode():
   email = request.json['email']
   code = request.json['code']
-
+  
   for item in codeList:
     if item['email'] == email and item['code'] == int(code):
       codeList.remove(item)
-      return '', 200
+      access_token = create_access_token(identity=email)
+      return jsonify(access_token=access_token), 200
 
   return 'Wrong code!', 401
