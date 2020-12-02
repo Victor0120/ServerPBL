@@ -16,6 +16,7 @@ TIME_CODE_IS_VALID = 300 #code will be valid 5 min
 
 codeList = []
 
+
 @auth.route('/', methods=['POST'])
 def postEmail(): 
   if request.method == 'POST':

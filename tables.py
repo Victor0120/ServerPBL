@@ -1,21 +1,8 @@
-from flask import Flask
-from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from flask_sqlalchemy import SQLAlchemy
-
-from dotenv import load_dotenv
-
-import auth
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///beepboop.db'
-
-db = SQLAlchemy(app)
-
-from tables import User, User_Courses, Teacher, Teacher_Courses, Courses, Course_Questions, Course_Question_Answer, Course_Materials, Message_History
+from server import db
 
 class User(db.Model):
 	__tablename__ = 'user'
+	#__table_args__ = {'extend_existing': True}
 	id = db.Column(db.Integer, primary_key=True)
 	email = db.Column(db.String(50), nullable=False)
 	user_courses = db.relationship("User_Courses")
@@ -91,24 +78,3 @@ class Message_History(db.Model):
 	sender_id = db.Column(db.Integer)
 	created_on = db.Column(db.TIMESTAMP, nullable=False)
 	message = db.Column(db.String(1000), nullable=False)
-
-
-def create_app():
-	
-	app.config['JWT_SECRET_KEY'] = 'beep-boop'
-	
-	
-	JWTManager(app)
-
-
-
-
-	load_dotenv('./.env')
-	CORS(app)
-
-	app.register_blueprint(auth.auth)
-
-	if __name__ == "__main__":
-		app.run(debug=True)
-
-	return app
