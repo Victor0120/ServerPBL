@@ -7,10 +7,13 @@ from dotenv import load_dotenv
 
 import auth
 
+from flask_migrate import Migrate
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///beepboop.db'
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 from tables import User, User_Courses, Teacher, Teacher_Courses, Courses, Course_Questions, Course_Question_Answer, Course_Materials, Message_History
 
