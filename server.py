@@ -1,10 +1,22 @@
 from flask import Flask
-app = Flask(__name__)
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 
-@app.route("/")
-def index():
+from dotenv import load_dotenv
 
-	return "Hello, World!"
+import auth
 
-if __name__ == "__main__":
-	app.run(debug=True)
+def create_app():
+	app = Flask(__name__)
+	app.config['JWT_SECRET_KEY'] = 'beep-boop'
+	JWTManager(app)
+
+	load_dotenv('./.env')
+	CORS(app)
+
+	app.register_blueprint(auth.auth)
+
+	if __name__ == "__main__":
+		app.run(debug=True)
+
+	return app
