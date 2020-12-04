@@ -11,18 +11,19 @@ db = SQLAlchemy()
 migrate = Migrate()
 
 def create_app(config_class=Config):
-	app = Flask(__name__)
-	app.config.from_object(Config)
+  app = Flask(__name__)
+  app.config.from_object(Config)
 	
-	load_dotenv('./.env')
+  load_dotenv('./.env')
 
-	db.init_app(app)
-	migrate.init_app(app, db)
+  db.init_app(app)
+  migrate.init_app(app, db)
 
-	JWTManager(app)
-	CORS(app)
+  JWTManager(app)
+  CORS(app)
 
-	import auth
-	app.register_blueprint(auth.auth)
+  from routes import user
+  app.register_blueprint(user.user)
 
-	return app
+
+  return app
