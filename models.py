@@ -124,3 +124,15 @@ class CourseScheme(marshmallow.SQLAlchemySchema):
 	id = marshmallow.auto_field()
 	code = marshmallow.auto_field()
 	course_name = marshmallow.auto_field()
+
+
+class MessageScheme(marshmallow.SQLAlchemySchema):
+	class Meta:
+		model = Message
+
+	course_id = marshmallow.auto_field()
+	receiver_id = marshmallow.auto_field()
+	sender_id = marshmallow.auto_field()
+	created_on = marshmallow.auto_field()
+	message = marshmallow.auto_field()
+
