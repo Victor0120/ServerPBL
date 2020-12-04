@@ -19,8 +19,8 @@ class User(db.Model):
 
 	courses = db.relationship("Course", secondary=UserCourse, backref='users')
 	course_questions = db.relationship("CourseQuestion", back_populates="sender")
-	#sent_messages = db.relationship("MessageHistory", back_populates="sender", foreign_keys=[message_history.sender_id])
-	#received_messages = db.relationship("MessageHistory", back_populates="receiver", foreign_keys=[message_history.receiver_id])
+	#sent_messages = db.relationship("Message", back_populates="sender", foreign_keys=[message_history.sender_id])
+	#received_messages = db.relationship("Message", back_populates="receiver", foreign_keys=[message_history.receiver_id])
 
 	def __repr__ (self):
 		return f"User('{self.email}')"
@@ -51,7 +51,7 @@ class Course(db.Model):
 	#teachers = db.relationship("TeacherCourse", back_populates="courses")
 	course_questions = db.relationship("CourseQuestion", back_populates="course")
 	course_materials = db.relationship("CourseMaterial", back_populates="course")
-	message_history = db.relationship("MessageHistory", back_populates="course")
+	message_history = db.relationship("Message", back_populates="course")
 	course_question_answers = db.relationship("CourseQuestionAnswer", back_populates="course")
 
 	def __repr__ (self):
@@ -98,8 +98,8 @@ class CourseMaterial(db.Model):
 		return f"CourseMaterial[course_id]('{self.course_id})"
 
 
-class MessageHistory(db.Model):
-	__tablename__ = 'message_history'
+class Message(db.Model):
+	__tablename__ = 'message'
 	id = db.Column(db.Integer, primary_key=True)
 	course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
 	receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -112,7 +112,7 @@ class MessageHistory(db.Model):
 	course = db.relationship("Course", back_populates="message_history")
 
 	def __repr__(self):
-		return f"MessageHistory[course_id]({self.course_id})"
+		return f"Message[course_id]({self.course_id})"
 
 #schems
 from server import marshmallow
