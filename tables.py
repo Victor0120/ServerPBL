@@ -68,7 +68,7 @@ class Course_Materials(db.Model):
 	__tablename__ = 'course_materials'
 	id = db.Column(db.Integer, primary_key=True)
 	course_id = db.Column(db.Integer, db.ForeignKey('courses.code'))
-	content = db.Column(db.Text, nullable=False)
+	data = db.Column(db.LargeBinary)
 
 class Message_History(db.Model):
 	__tablename__ = 'message_history'
