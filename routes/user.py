@@ -21,12 +21,12 @@ class User():
   def get_user():
     try:
       userId = get_jwt_identity()
-      user = UserTable.query.get(userId)
-
-      return jsonify({'email': user.email}), 200
+      user = UserTable.query.get(userId['id'])
 
     except Exception as e:
       return str(e)
+
+    return jsonify({'email': user.email}), 200
 
   def send_auth_email():
     email = request.json['email']

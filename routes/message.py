@@ -17,7 +17,7 @@ class Message():
   def get_user_messages():
     try:
       user_id = get_jwt_identity()
-      user = UserTable.query.get(user_id)
+      user = UserTable.query.get(user_id['id'])
 
     except Exception as e:
       return str(e)
