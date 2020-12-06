@@ -114,7 +114,7 @@ class MessageHistory(db.Model):
 	def __repr__(self):
 		return f"MessageHistory[course_id]({self.course_id})"
 
-#schems
+#schemes
 from server import marshmallow
 
 class CourseScheme(marshmallow.SQLAlchemySchema):
@@ -124,3 +124,57 @@ class CourseScheme(marshmallow.SQLAlchemySchema):
 	id = marshmallow.auto_field()
 	code = marshmallow.auto_field()
 	course_name = marshmallow.auto_field()
+
+class UserScheme(marshmallow.SQLAlchemySchema):
+	class Meta:
+		model = User
+
+	id = marshmallow.auto_field()
+	email = marshmallow.auto_field()
+
+class TeacherScheme(marshmallow.SQLAlchemySchema):
+	class Meta:
+		model = Teacher
+
+	id = marshmallow.auto_field()
+	first_name = marshmallow.auto_field()
+	last_name = marshmallow.auto_field()
+	email = marshmallow.auto_field()
+
+class CourseQuestionScheme(marshmallow.SQLAlchemySchema):
+	class Meta:
+		model = CourseQuestion
+
+	id = marshmallow.auto_field()
+	sender_id = marshmallow.auto_field()
+	course_id = marshmallow.auto_field()
+	message = marshmallow.auto_field()
+	created_on = marshmallow.auto_field()
+
+class CourseQuestionAnswerScheme(marshmallow.SQLAlchemySchema):
+	class Meta:
+		model = CourseQuestionAnswer
+
+	id = marshmallow.auto_field()
+	course_id = marshmallow.auto_field()
+	question = marshmallow.auto_field()
+	answer = marshmallow.auto_field()
+
+class CourseMaterialScheme(marshmallow.SQLAlchemySchema):
+	class Meta:
+		model = CourseMaterial
+
+	id = marshmallow.auto_field()
+	course_id = marshmallow.auto_field()
+	data = marshmallow.auto_field()
+
+class MessageHistoryScheme(marshmallow.SQLAlchemySchema):
+	class Meta:
+		model = MessageHistory
+
+	id = marshmallow.auto_field()
+	course_id = marshmallow.auto_field()
+	receiver_id = marshmallow.auto_field()
+	sender_id = marshmallow.auto_field()
+	created_on = marshmallow.auto_field()
+	message = marshmallow.auto_field()				
