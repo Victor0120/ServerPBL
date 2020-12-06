@@ -114,7 +114,7 @@ class MessageHistory(db.Model):
 	def __repr__(self):
 		return f"MessageHistory[course_id]({self.course_id})"
 
-#schems
+#schemes
 from server import marshmallow
 
 class CourseScheme(marshmallow.SQLAlchemySchema):
