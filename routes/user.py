@@ -17,6 +17,43 @@ codeList = []
 
 class User():
 
+#  query-ul pentru adaugarea unui course la user arata in felul urmator:
+#  
+#  user = User.query.filter(User.id == <variabila_user.id>).first()
+#  course = Course.query.filter(Course.code == <variabila course.code>).first()
+#  user.courses.append(course)  
+#  db.session.commit()
+#
+#  .courses din user.courses.append(course) reprezinta relatia dintre tabele
+
+  @jwt_required
+  def add_course_to_user():
+    try:
+      userId = get_jwt_identity()
+      user = UserTable.query.filter(UserTable.id == userId).first()
+      course = CourseTable.query.filter(CourseTable.code == <course_variable>).first()
+      user.courses.append(course)
+      db.session.commit()
+
+    except Exception as e:
+      return str(e)
+
+#  query-ul pentru adaugarea unui course la user arata in felul urmator:
+#
+#db.session.query(Course.code).filter(UserCourse.c.user == User.id).filter(UserCourse.c.course == Course.id).filter(User.id == <variabila_user.id>).all()
+
+
+  @jwt_required
+  def get_user_courses():
+    try:
+      userId = get_jwt_identity()
+      courses = db.session.query(CourseTable.code).filter(UserCourseTable.c.user == UserTable.id).filter(UserCourseTable.c.course == CourseTable.id).filter(UserTable.id == userId).all()
+
+      return jsonify({'code': course.code}), 200
+
+    except Exception as e:
+      return str(e)
+
   @jwt_required
   def get_user():
     try:
@@ -95,3 +132,6 @@ user.add_url_rule('/auth', view_func=User.send_auth_email, methods=['POST'])
 user.add_url_rule('/auth/code',view_func=User.check_auth_code, methods=['POST'])
 
 user.add_url_rule('/',view_func=User.get_user, methods=['GET'])
+
+user.add_url_rule('/',view_func=User.add_course_to_user, methods=['POST'])
+user.add_url_rule('/',view_func=User.get_user_courses, methods=['GET'])
