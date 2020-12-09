@@ -19,7 +19,7 @@ def create_app(config_class=Config):
   load_dotenv('./.env')
 
   db.init_app(app)
-  migrate.init_app(app, db)
+  migrate.init_app(app, db, render_as_batch=True)
 
   JWTManager(app)
   CORS(app)
