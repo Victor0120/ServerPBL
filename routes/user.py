@@ -9,7 +9,7 @@ from sendgrid.helpers.mail import Mail
 from sendgrid import SendGridAPIClient
 
 from server import db
-from models import User as UserTable
+from models import User as UserTable, Teacher as TeacherTable
 
 user = Blueprint('user', __name__, url_prefix='/user')
 
@@ -21,12 +21,17 @@ class User():
   def get_user():
     try:
       userId = get_jwt_identity()
-      user = UserTable.query.get(userId)
+      user = UserTable.query.get(userId['id'])
 
-      return jsonify({'email': user.email}), 200
+      if user is None:
+        teacher = TeacherTable.query.get(userId['id'])
+
+        return jsonify({'email': teacher.email, 'isAdmin': True}), 200
 
     except Exception as e:
       return str(e)
+
+    return jsonify({'email': user.email, "isAdmin": False}), 200
 
   def send_auth_email():
     email = request.json['email']
@@ -76,18 +81,25 @@ class User():
         isUserRegistered = db.session.query(UserTable.id).filter_by(email=email).scalar() is not None
 
         if isUserRegistered:
-          userId = db.session.query(UserTable.id).filter(UserTable.email == email).first()
+          userId = db.session.query(UserTable.id).filter_by(email = email).first()
           
           access_token = create_access_token(identity=userId, expires_delta=False)
+          
           return jsonify(access_token=access_token), 200
-        else:
-          newUser = UserTable(email = email)
 
-          db.session.add(newUser)   
-          db.session.commit()
+        teacherId = db.session.query(TeacherTable.id).filter_by(email = email).first()
 
-          access_token = create_access_token(identity=newUser.id)
+        if teacherId is not None:
+          access_token = create_access_token(identity=teacherId)
           return jsonify(access_token=access_token), 200
+
+        newUser = UserTable(email = email)
+
+        db.session.add(newUser)   
+        db.session.commit()
+
+        access_token = create_access_token(identity=newUser.id)
+        return jsonify(access_token=access_token), 200
 
     return 'Wrong code!', 401
 

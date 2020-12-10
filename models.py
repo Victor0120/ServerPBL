@@ -20,8 +20,8 @@ class User(db.Model):
 	teacher = db.relationship("Teacher", uselist=False, back_populates="user")
 	courses = db.relationship("Course", secondary=UserCourse, backref='users')
 	course_questions = db.relationship("CourseQuestion", back_populates="sender")
-	#sent_messages = db.relationship("MessageHistory", back_populates="sender", foreign_keys=[message_history.sender_id])
-	#received_messages = db.relationship("MessageHistory", back_populates="receiver", foreign_keys=[message_history.receiver_id])
+	#sent_messages = db.relationship("Message", back_populates="sender", foreign_keys=[message_history.sender_id])
+	#received_messages = db.relationship("Message", back_populates="receiver", foreign_keys=[message_history.receiver_id])
 
 	def __repr__ (self):
 		return f"User('{self.email}')"
@@ -51,7 +51,7 @@ class Course(db.Model):
 	#teachers = db.relationship("TeacherCourse", back_populates="courses")
 	course_questions = db.relationship("CourseQuestion", back_populates="course")
 	course_materials = db.relationship("CourseMaterial", back_populates="course")
-	message_history = db.relationship("MessageHistory", back_populates="course")
+	message_history = db.relationship("Message", back_populates="course")
 	course_question_answers = db.relationship("CourseQuestionAnswer", back_populates="course")
 
 	def __repr__ (self):
@@ -98,8 +98,8 @@ class CourseMaterial(db.Model):
 		return f"CourseMaterial[course_id]('{self.course_id})"
 
 
-class MessageHistory(db.Model):
-	__tablename__ = 'message_history'
+class Message(db.Model):
+	__tablename__ = 'message'
 	id = db.Column(db.Integer, primary_key=True)
 	course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
 	receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -112,7 +112,7 @@ class MessageHistory(db.Model):
 	course = db.relationship("Course", back_populates="message_history")
 
 	def __repr__(self):
-		return f"MessageHistory[course_id]({self.course_id})"
+		return f"Message[course_id]({self.course_id})"
 
 #schemes
 from server import marshmallow
@@ -126,11 +126,11 @@ class CourseScheme(marshmallow.SQLAlchemySchema):
 	course_name = marshmallow.auto_field()
 
 class UserScheme(marshmallow.SQLAlchemySchema):
-	class Meta:
-		model = User
+  class Meta:
+    model = User
 
-	id = marshmallow.auto_field()
-	email = marshmallow.auto_field()
+  id = marshmallow.auto_field()
+  email = marshmallow.auto_field()
 
 class TeacherScheme(marshmallow.SQLAlchemySchema):
 	class Meta:
@@ -166,13 +166,14 @@ class CourseMaterialScheme(marshmallow.SQLAlchemySchema):
 	course_id = marshmallow.auto_field()
 	data = marshmallow.auto_field()
 
-class MessageHistoryScheme(marshmallow.SQLAlchemySchema):
+class MessageScheme(marshmallow.SQLAlchemySchema):
 	class Meta:
-		model = MessageHistory
+		model = Message
 
 	id = marshmallow.auto_field()
 	course_id = marshmallow.auto_field()
 	receiver_id = marshmallow.auto_field()
 	sender_id = marshmallow.auto_field()
 	created_on = marshmallow.auto_field()
-	message = marshmallow.auto_field()				
+	message = marshmallow.auto_field()
+
