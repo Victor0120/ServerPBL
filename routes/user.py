@@ -17,42 +17,37 @@ codeList = []
 
 class User():
 
-#  query-ul pentru adaugarea unui course la user arata in felul urmator:
-#  
-#  user = User.query.filter(User.id == <variabila_user.id>).first()
-#  course = Course.query.filter(Course.code == <variabila course.code>).first()
-#  user.courses.append(course)  
-#  db.session.commit()
-#
-#  .courses din user.courses.append(course) reprezinta relatia dintre tabele
-
   @jwt_required
   def add_course_to_user():
     try:
       userId = get_jwt_identity()
-      user = UserTable.query.filter(UserTable.id == userId).first()
-      course = CourseTable.query.filter(CourseTable.code == <course_variable>).first()
+      courseId = request.json['course_id']
+      user = UserTable.query.get(userId)
+      course = CourseTable.query.get(courseId)
       user.courses.append(course)
       db.session.commit()
 
+      return jsonify{'status': success}, 200
+
     except Exception as e:
       return str(e)
-
-#  query-ul pentru adaugarea unui course la user arata in felul urmator:
-#
-#db.session.query(Course.code).filter(UserCourse.c.user == User.id).filter(UserCourse.c.course == Course.id).filter(User.id == <variabila_user.id>).all()
 
 
   @jwt_required
   def get_user_courses():
     try:
       userId = get_jwt_identity()
-      courses = db.session.query(CourseTable.code).filter(UserCourseTable.c.user == UserTable.id).filter(UserCourseTable.c.course == CourseTable.id).filter(UserTable.id == userId).all()
+      user = UserTable.query.get(userId)
+      courses = user.courses
 
-      return jsonify({'code': course.code}), 200
+      course_schema = CourseScheme()
+      output = course_schema.dump(courses, many=True)
+
+      return jsonify({"courses":output}), 200
 
     except Exception as e:
       return str(e)
+
 
   @jwt_required
   def get_user():
@@ -64,6 +59,7 @@ class User():
 
     except Exception as e:
       return str(e)
+
 
   def send_auth_email():
     email = request.json['email']
