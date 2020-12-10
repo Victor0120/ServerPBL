@@ -22,16 +22,12 @@ class User():
     try:
       userId = get_jwt_identity()
       user = UserTable.query.get(userId['id'])
-
-      if user is None:
-        teacher = TeacherTable.query.get(userId['id'])
-
-        return jsonify({'email': teacher.email, 'isAdmin': True}), 200
+      isAdmin = (user.teacher != None)
 
     except Exception as e:
       return str(e)
 
-    return jsonify({'email': user.email, "isAdmin": False}), 200
+    return jsonify({'email': user.email, "isAdmin": isAdmin}), 200
 
   def send_auth_email():
     email = request.json['email']
@@ -79,6 +75,7 @@ class User():
         codeList.remove(item)
 
         isUserRegistered = db.session.query(UserTable.id).filter_by(email=email).scalar() is not None
+        user = UserTable.query.filter_by(email=email).first()
 
         if isUserRegistered:
           userId = db.session.query(UserTable.id).filter_by(email = email).first()
