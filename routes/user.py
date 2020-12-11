@@ -4,6 +4,7 @@ from random import randint
 from threading import Timer
 
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_cors import cross_origin
 
 from sendgrid.helpers.mail import Mail
 from sendgrid import SendGridAPIClient
@@ -20,14 +21,14 @@ class User():
   @jwt_required
   def get_user():
     try:
-      userId = get_jwt_identity()
-      user = UserTable.query.get(userId['id'])
-      isAdmin = (user.teacher != None)
+      user_id = get_jwt_identity()
+      user = UserTable.query.get(user_id)
+      is_admin = (user.teacher != None)
 
     except Exception as e:
       return str(e)
 
-    return jsonify({'email': user.email, "isAdmin": isAdmin}), 200
+    return jsonify({'email': user.email, "isAdmin": is_admin}), 200
 
   def send_auth_email():
     email = request.json['email']
@@ -74,20 +75,11 @@ class User():
       if item['email'] == email and item['code'] == int(code):
         codeList.remove(item)
 
-        isUserRegistered = db.session.query(UserTable.id).filter_by(email=email).scalar() is not None
         user = UserTable.query.filter_by(email=email).first()
 
-        if isUserRegistered:
-          userId = db.session.query(UserTable.id).filter_by(email = email).first()
+        if user:
+          access_token = create_access_token(identity=user.id, expires_delta=False)
           
-          access_token = create_access_token(identity=userId, expires_delta=False)
-          
-          return jsonify(access_token=access_token), 200
-
-        teacherId = db.session.query(TeacherTable.id).filter_by(email = email).first()
-
-        if teacherId is not None:
-          access_token = create_access_token(identity=teacherId)
           return jsonify(access_token=access_token), 200
 
         newUser = UserTable(email = email)
@@ -99,6 +91,9 @@ class User():
         return jsonify(access_token=access_token), 200
 
     return 'Wrong code!', 401
+
+
+
 
 user.add_url_rule('/auth', view_func=User.send_auth_email, methods=['POST'])
 user.add_url_rule('/auth/code',view_func=User.check_auth_code, methods=['POST'])

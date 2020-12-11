@@ -30,4 +30,7 @@ def create_app(config_class=Config):
   from routes import courses
   app.register_blueprint(courses.courses)
 
+  from routes import questionAnswers
+  app.register_blueprint(questionAnswers.question_answer)
+
   return app
