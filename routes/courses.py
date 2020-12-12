@@ -16,8 +16,6 @@ class Courses():
       user_id = get_jwt_identity()
       user = UserTable.query.get(user_id)
       teacher = user.teacher
-      if teacher:
-        print(teacher)
 
       if teacher:
         courses = teacher.courses
@@ -71,14 +69,13 @@ class Courses():
         questions = []
         for course in teacher.courses:
           course_questions = course_question_scheme.dump(course.course_questions, many=True)
-          print(course_questions)
+
           course = course_scheme.dump(course)
           for question in course_questions:
             question['course'] = course
 
           questions.extend(course_questions)
-        
-        print(course_questions)
+
         output = course_questions
 
        # output = course_question_scheme.dump(questions, many=True)
