@@ -63,31 +63,24 @@ class Courses():
         course = CourseTable.query.get(course_id)
         course_questions = course.course_questions
 
-        questions = course_question_scheme.dump(course_questions, many=True)
+        results = course_question_scheme.dump(course_questions, many=True)
         course = course_scheme.dump(course)
 
-        for q in questions:
-          q['course'] = course
-
-        output = questions
+        for res in results:
+          res['course'] = course
 
       else:
-        questions = []
+        results = []
         for course in teacher.courses:
           course_questions = course_question_scheme.dump(course.course_questions, many=True)
-          print(course_questions)
           course = course_scheme.dump(course)
           for question in course_questions:
             question['course'] = course
 
-          questions.extend(course_questions)
-        
-        print(course_questions)
-        output = course_questions
+          results.extend(course_questions)
 
-       # output = course_question_scheme.dump(questions, many=True)
-
-      return jsonify({"questions": output})
+      print("Questions:", results)
+      return jsonify({"questions": results})
 
     except Exception as e:
       return str(e), 400
