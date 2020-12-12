@@ -4,12 +4,13 @@ from random import randint
 from threading import Timer
 
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_cors import cross_origin
 
 from sendgrid.helpers.mail import Mail
 from sendgrid import SendGridAPIClient
 
 from server import db
-from models import User as UserTable
+from models import User as UserTable, Teacher as TeacherTable
 
 user = Blueprint('user', __name__, url_prefix='/user')
 
@@ -20,13 +21,14 @@ class User():
   @jwt_required
   def get_user():
     try:
-      userId = get_jwt_identity()
-      user = UserTable.query.get(userId)
-
-      return jsonify({'email': user.email}), 200
+      user_id = get_jwt_identity()
+      user = UserTable.query.get(user_id)
+      is_admin = (user.teacher != None)
 
     except Exception as e:
       return str(e)
+
+    return jsonify({'email': user.email, "isAdmin": is_admin}), 200
 
   def send_auth_email():
     email = request.json['email']
@@ -73,23 +75,25 @@ class User():
       if item['email'] == email and item['code'] == int(code):
         codeList.remove(item)
 
-        isUserRegistered = db.session.query(UserTable.id).filter_by(email=email).scalar() is not None
+        user = UserTable.query.filter_by(email=email).first()
 
-        if isUserRegistered:
-          userId = db.session.query(UserTable.id).filter(UserTable.email == email).first()
+        if user:
+          access_token = create_access_token(identity=user.id, expires_delta=False)
           
-          access_token = create_access_token(identity=userId, expires_delta=False)
           return jsonify(access_token=access_token), 200
-        else:
-          newUser = UserTable(email = email)
 
-          db.session.add(newUser)   
-          db.session.commit()
+        newUser = UserTable(email = email)
 
-          access_token = create_access_token(identity=newUser.id)
-          return jsonify(access_token=access_token), 200
+        db.session.add(newUser)   
+        db.session.commit()
+
+        access_token = create_access_token(identity=newUser.id)
+        return jsonify(access_token=access_token), 200
 
     return 'Wrong code!', 401
+
+
+
 
 user.add_url_rule('/auth', view_func=User.send_auth_email, methods=['POST'])
 user.add_url_rule('/auth/code',view_func=User.check_auth_code, methods=['POST'])
