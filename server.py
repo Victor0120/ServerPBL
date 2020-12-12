@@ -24,7 +24,7 @@ def create_app(config_class=Config):
   JWTManager(app)
   CORS(app)
 
-  from routes import user
+  from routes import user, courseMaterials
   app.register_blueprint(user.user)
 
   from routes import courses
@@ -32,5 +32,6 @@ def create_app(config_class=Config):
 
   from routes import questionAnswers
   app.register_blueprint(questionAnswers.question_answer)
+  app.register_blueprint(courseMaterials.course_materials)
 
   return app

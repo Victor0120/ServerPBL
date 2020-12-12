@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from server import db
@@ -57,16 +57,14 @@ class Courses():
         course = CourseTable.query.get(course_id)
         course_questions = course.course_questions
 
-        questions = course_question_scheme.dump(course_questions, many=True)
+        results = course_question_scheme.dump(course_questions, many=True)
         course = course_scheme.dump(course)
 
-        for q in questions:
-          q['course'] = course
-
-        output = questions
+        for res in results:
+          res['course'] = course
 
       else:
-        questions = []
+        results = []
         for course in teacher.courses:
           course_questions = course_question_scheme.dump(course.course_questions, many=True)
 
@@ -74,13 +72,9 @@ class Courses():
           for question in course_questions:
             question['course'] = course
 
-          questions.extend(course_questions)
+          results.extend(course_questions)
 
-        output = course_questions
-
-       # output = course_question_scheme.dump(questions, many=True)
-
-      return jsonify({"questions": output})
+      return jsonify({"questions": results})
 
     except Exception as e:
       return str(e), 400
@@ -102,15 +96,6 @@ class Courses():
       return str(e), 400
 
 
-  # def get_course_materials():
-  #   course_id = request.json['id']
-
-  #   course = CourseTable.query.get(course_id)
-  #   course_materials = course.course_materials
-
-
-
-#courses.add_url_rule('/',view_func=Courses.get_all_courses, methods=['GET'])
 courses.add_url_rule('/', view_func=Courses.get_user_courses, methods=['GET'])  
 courses.add_url_rule('/questions/', view_func=Courses.get_course_questions, methods=['POST'])
 courses.add_url_rule('/question-answers/', view_func=Courses.get_course_question_answers, methods=['POST'])
