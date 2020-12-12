@@ -71,7 +71,8 @@ class CourseMaterials():
                 added_files.append(filename)
 
         return jsonify(
-            {'filenames': added_files}
+            {'filenames': added_files,
+             'status': 'success'}
         )
 
 course_materials.add_url_rule('/', view_func=CourseMaterials.uploadFiles, methods=['POST'])  
