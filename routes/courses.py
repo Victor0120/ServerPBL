@@ -1,11 +1,9 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask_cors import cross_origin
 
-from models import db
-from models import Course, Teacher, User, CourseQuestion, TeacherCourse
-from models import Course as CourseTable, CourseScheme
-from models import CourseQuestionScheme, CourseQuestionAnswerScheme
+from server import db
+from models import User as UserTable, Course as CourseTable, CourseScheme, CourseQuestionScheme, CourseQuestionAnswerScheme
+
 
 courses = Blueprint('courses', __name__, url_prefix='/courses')
 
@@ -16,7 +14,7 @@ class Courses():
   def get_user_courses():
     try:
       user_id = get_jwt_identity()
-      user = User.query.get(user_id)
+      user = UserTable.query.get(user_id)
       teacher = user.teacher
       if teacher:
         print(teacher)
@@ -35,7 +33,6 @@ class Courses():
       return str(e), 400
 
   @jwt_required
-  @cross_origin()
   def get_all_courses():
     courses = CourseTable.query.all()
 
@@ -45,11 +42,10 @@ class Courses():
     return jsonify({"courses":output})
 
   @jwt_required
-  @cross_origin()
   def get_course_questions():
     try:
       user_id = get_jwt_identity()
-      teacher = User.query.get(user_id).teacher
+      teacher = UserTable.query.get(user_id).teacher
 
       if not teacher:
         return "Unauthorized", 401
@@ -94,7 +90,6 @@ class Courses():
 
 
   @jwt_required
-  @cross_origin()
   def get_course_question_answers():
     try:
       course_id = request.json['id']

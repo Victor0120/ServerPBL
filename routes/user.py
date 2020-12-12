@@ -4,7 +4,6 @@ from random import randint
 from threading import Timer
 
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from flask_cors import cross_origin
 
 from sendgrid.helpers.mail import Mail
 from sendgrid import SendGridAPIClient

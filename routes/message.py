@@ -1,11 +1,8 @@
 from flask import Blueprint, jsonify
-from models import Message as MessageTable
-from models import MessageScheme
-from models import User as UserTable
-from models import MessageSchema
-from server import db
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from models import Message as MessageTable, MessageScheme, User as UserTable 
+from server import db
 
 
 messages = Blueprint('messages', __name__, url_prefix='/messages')

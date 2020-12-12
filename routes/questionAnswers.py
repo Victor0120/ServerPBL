@@ -1,22 +1,16 @@
 from flask import Blueprint, request, jsonify, current_app
-from os import environ
-from random import randint
-from threading import Timer
 
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from flask_cors import cross_origin
-
-from sendgrid.helpers.mail import Mail
-from sendgrid import SendGridAPIClient
+from flask_jwt_extended import jwt_required
 
 from server import db
-from models import User, CourseQuestionAnswer, CourseQuestion
+from models import CourseQuestionAnswer, CourseQuestion
 
 question_answer = Blueprint('question', __name__, url_prefix='/question-answer')
 
 codeList = []
 
 class QuestionAnswer():
+  @jwt_required
   def handleAnswerSubmit():
     try:
         course_id = request.json['course_id']
