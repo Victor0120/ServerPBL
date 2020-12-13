@@ -2,14 +2,13 @@ from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from server import db
-from models import User as UserTable, Course as CourseTable, CourseScheme, CourseQuestionScheme, CourseQuestionAnswerScheme
+from models import User as UserTable, Course as CourseTable, CourseScheme, CourseQuestionScheme, CourseQuestionAnswerScheme, Teacher as TeacherTable, TeacherScheme, UserScheme
 
 
 courses = Blueprint('courses', __name__, url_prefix='/courses')
 
 
 class Courses():
-
   @jwt_required
   def get_user_courses():
     try:
@@ -23,9 +22,9 @@ class Courses():
         courses = user.courses
 
       course_scheme = CourseScheme()
-      output = course_scheme.dump(courses, many=True)
+      courses_output = course_scheme.dump(courses, many=True)
 
-      return jsonify({"courses": output})
+      return jsonify({"courses": courses_output})
 
     except Exception as e:
       return str(e), 400
@@ -35,7 +34,26 @@ class Courses():
     courses = CourseTable.query.all()
 
     course_schema = CourseScheme()
-    output = course_schema.dump(courses, many=True)
+    teachers_schema = TeacherScheme()
+    user_scheme = UserScheme()
+
+    output = []
+
+    for course in courses:
+      teachers = course.teachers
+
+      course_output = course_schema.dump(course)
+      teachers_output = teachers_schema.dump(teachers, many=True)
+
+      teacher_email_list = []
+      for teacher in teachers_output:
+        teacher_details = UserTable.query.get(teacher['user_id'])
+        teacher_output = user_scheme.dump(teacher_details)
+
+        teacher_email_list.append(teacher_output["email"])
+
+      course_output["teachers"] = teacher_email_list
+      output.append(course_output)
 
     return jsonify({"courses":output})
 

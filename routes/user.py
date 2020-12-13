@@ -113,7 +113,7 @@ class User():
   @jwt_required
   def remove_user_course():
     try:
-      courseId =request.args.get('course_id')
+      courseId = request.args.get('course_id')
 
       userId = get_jwt_identity()
       user = UserTable.query.get(userId)
