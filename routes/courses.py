@@ -96,7 +96,8 @@ class Courses():
       return str(e), 400
 
 
-courses.add_url_rule('/', view_func=Courses.get_user_courses, methods=['GET'])  
+courses.add_url_rule('/', view_func=Courses.get_all_courses, methods=['GET'])  
+courses.add_url_rule('/user-courses/', view_func=Courses.get_user_courses, methods=['GET'])  
 courses.add_url_rule('/questions/', view_func=Courses.get_course_questions, methods=['POST'])
 courses.add_url_rule('/question-answers/', view_func=Courses.get_course_question_answers, methods=['POST'])
 
