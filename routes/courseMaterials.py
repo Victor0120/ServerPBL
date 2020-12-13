@@ -70,9 +70,9 @@ class CourseMaterials():
                 db.session.commit()
                 added_files.append(filename)
 
-        return jsonify(
-            {'filenames': added_files,
-             'status': 'success'}
-        )
+        return jsonify({
+            'filenames': added_files,
+            'status':  "not saved" if len(added_files) == 0 else 'success'
+            })
 
 course_materials.add_url_rule('/', view_func=CourseMaterials.uploadFiles, methods=['POST'])  
