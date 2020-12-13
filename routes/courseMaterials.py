@@ -73,7 +73,6 @@ class CourseMaterials():
         return jsonify({
             'filenames': added_files,
             'status':  "not saved" if len(added_files) == 0 else 'success'
-            }
-        )
+            })
 
 course_materials.add_url_rule('/', view_func=CourseMaterials.uploadFiles, methods=['POST'])  
