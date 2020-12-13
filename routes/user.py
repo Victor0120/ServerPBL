@@ -9,14 +9,13 @@ from sendgrid.helpers.mail import Mail
 from sendgrid import SendGridAPIClient
 
 from server import db
-from models import User as UserTable, Teacher as TeacherTable
+from models import User as UserTable, Teacher as TeacherTable, Course as CourseTable, CourseScheme
 
 user = Blueprint('user', __name__, url_prefix='/user')
 
 codeList = []
 
 class User():
-
   @jwt_required
   def get_user():
     try:
@@ -55,7 +54,7 @@ class User():
       })
 
       def deleteCode(email):
-        next(codeList.remove(item) for item in codeList if item["email"] == email)
+        codeList = [item for item in codeList if item['email'] != email]
 
       timer = Timer(current_app.config['TIME_AUTH_CODE_IS_VALID'], deleteCode, [email])
       timer.start()
@@ -91,10 +90,31 @@ class User():
 
     return 'Wrong code!', 401
 
+  @jwt_required
+  def add_course_to_user():
+    try:
+      courseId = request.json['course_id']
+      
+      userId = get_jwt_identity()
+      user = UserTable.query.get(userId)
+      
+      course = CourseTable.query.get(courseId)
+      user.courses.append(course)
+      db.session.commit()
+
+      course_schema = CourseScheme()
+      output = course_schema.dump(course)
+
+      return jsonify({'status': 'success', "course": output}), 200
+
+    except Exception as e:
+      return jsonify({'status': str(e)})
 
 
 
+user.add_url_rule('/',view_func=User.get_user, methods=['GET'])
+user.add_url_rule('/course',view_func=User.add_course_to_user, methods=['POST'])
 user.add_url_rule('/auth', view_func=User.send_auth_email, methods=['POST'])
 user.add_url_rule('/auth/code',view_func=User.check_auth_code, methods=['POST'])
 
-user.add_url_rule('/',view_func=User.get_user, methods=['GET'])
+

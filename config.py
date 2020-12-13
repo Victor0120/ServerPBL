@@ -6,6 +6,8 @@ class Config:
 
     CHATBOT_EMAIL = 'beepboop.faf@gmail.com'
     TIME_AUTH_CODE_IS_VALID = 300 #code will be valid 5 min
+
+    CHATBOT_ID = 0
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     CORS_HEADERS = 'Content-Type'
