@@ -19,14 +19,18 @@ def create_app(config_class=Config):
   load_dotenv('./.env')
 
   db.init_app(app)
-  migrate.init_app(app, db)
+  migrate.init_app(app, db, render_as_batch=True)
 
   JWTManager(app)
   CORS(app)
 
-  from routes import user, courses, message
+  from routes import user, courses, message, courseMaterials, questionAnswers
+
   app.register_blueprint(user.user)
   app.register_blueprint(courses.courses)
   app.register_blueprint(message.messages)
+
+  app.register_blueprint(questionAnswers.question_answer)
+  app.register_blueprint(courseMaterials.course_materials)
 
   return app

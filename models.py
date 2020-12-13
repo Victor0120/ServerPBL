@@ -17,6 +17,7 @@ class User(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	email = db.Column(db.String(50), nullable=False)
 
+	teacher = db.relationship("Teacher", uselist=False, back_populates="user")
 	courses = db.relationship("Course", secondary=UserCourse, backref='users')
 	course_questions = db.relationship("CourseQuestion", back_populates="sender")
 	#sent_messages = db.relationship("Message", back_populates="sender", foreign_keys=[message_history.sender_id])
@@ -29,15 +30,14 @@ class User(db.Model):
 class Teacher(db.Model):
 	__tablename__ = 'teacher'
 	id = db.Column(db.Integer, primary_key=True)
-	first_name = db.Column(db.String(20), nullable=False)
-	last_name = db.Column(db.String(20), nullable=False)
-	email = db.Column(db.String(50), nullable=False)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+	user = db.relationship("User", back_populates='teacher')
 	courses = db.relationship("Course", secondary=TeacherCourse, backref="teachers")
 	#courses = db.relationship("TeacherCourse", back_populates="teachers")
 
 	def __repr__ (self):
-		return f"Teacher('{self.first_name}', '{self.last_name}', '{self.email}')"
+		return f"Teacher('{self.id}', '{self.user_id}')"
 
 
 
@@ -90,7 +90,7 @@ class CourseMaterial(db.Model):
 	__tablename__ = 'course_material'
 	id = db.Column(db.Integer, primary_key=True)
 	course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
-	data = db.Column(db.LargeBinary)
+	filename = db.Column(db.String(150))
 
 	course = db.relationship("Course", back_populates="course_materials")
 
@@ -137,9 +137,7 @@ class TeacherScheme(marshmallow.SQLAlchemySchema):
 		model = Teacher
 
 	id = marshmallow.auto_field()
-	first_name = marshmallow.auto_field()
-	last_name = marshmallow.auto_field()
-	email = marshmallow.auto_field()
+	user_id = marshmallow.auto_field()
 
 class CourseQuestionScheme(marshmallow.SQLAlchemySchema):
 	class Meta:
@@ -166,7 +164,7 @@ class CourseMaterialScheme(marshmallow.SQLAlchemySchema):
 
 	id = marshmallow.auto_field()
 	course_id = marshmallow.auto_field()
-	data = marshmallow.auto_field()
+	filename = marshmallow.auto_field()
 
 class MessageScheme(marshmallow.SQLAlchemySchema):
 	class Meta:

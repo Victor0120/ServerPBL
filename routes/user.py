@@ -9,24 +9,24 @@ from sendgrid.helpers.mail import Mail
 from sendgrid import SendGridAPIClient
 
 from server import db
-from models import User as UserTable
+from models import User as UserTable, Teacher as TeacherTable, Course as CourseTable, CourseScheme
 
 user = Blueprint('user', __name__, url_prefix='/user')
 
 codeList = []
 
 class User():
-
   @jwt_required
   def get_user():
     try:
-      userId = get_jwt_identity()
-      user = UserTable.query.get(userId['id'])
+      user_id = get_jwt_identity()
+      user = UserTable.query.get(user_id)
+      is_admin = (user.teacher != None)
 
     except Exception as e:
       return str(e)
 
-    return jsonify({'email': user.email}), 200
+    return jsonify({'email': user.email, "isAdmin": is_admin}), 200
 
   def send_auth_email():
     email = request.json['email']
@@ -73,25 +73,48 @@ class User():
       if item['email'] == email and item['code'] == int(code):
         codeList.remove(item)
 
-        isUserRegistered = db.session.query(UserTable.id).filter_by(email=email).scalar() is not None
+        user = UserTable.query.filter_by(email=email).first()
 
-        if isUserRegistered:
-          userId = db.session.query(UserTable.id).filter(UserTable.email == email).first()
+        if user:
+          access_token = create_access_token(identity=user.id, expires_delta=False)
           
-          access_token = create_access_token(identity=userId, expires_delta=False)
           return jsonify(access_token=access_token), 200
-        else:
-          newUser = UserTable(email = email)
 
-          db.session.add(newUser)   
-          db.session.commit()
+        newUser = UserTable(email = email)
 
-          access_token = create_access_token(identity=newUser.id)
-          return jsonify(access_token=access_token), 200
+        db.session.add(newUser)   
+        db.session.commit()
+
+        access_token = create_access_token(identity=newUser.id)
+        return jsonify(access_token=access_token), 200
 
     return 'Wrong code!', 401
 
+  @jwt_required
+  def add_course_to_user():
+    try:
+      courseId = request.json['course_id']
+      
+      userId = get_jwt_identity()
+      user = UserTable.query.get(userId)
+      
+      course = CourseTable.query.get(courseId)
+      user.courses.append(course)
+      db.session.commit()
+
+      course_schema = CourseScheme()
+      output = course_schema.dump(course)
+
+      return jsonify({'status': 'success', "course": output}), 200
+
+    except Exception as e:
+      return jsonify({'status': str(e)})
+
+
+
+user.add_url_rule('/',view_func=User.get_user, methods=['GET'])
+user.add_url_rule('/course',view_func=User.add_course_to_user, methods=['POST'])
 user.add_url_rule('/auth', view_func=User.send_auth_email, methods=['POST'])
 user.add_url_rule('/auth/code',view_func=User.check_auth_code, methods=['POST'])
 
-user.add_url_rule('/',view_func=User.get_user, methods=['GET'])
+
