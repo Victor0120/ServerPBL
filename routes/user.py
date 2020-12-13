@@ -110,11 +110,27 @@ class User():
     except Exception as e:
       return jsonify({'status': str(e)})
 
+  @jwt_required
+  def remove_user_course():
+    try:
+      courseId =request.args.get('course_id')
+
+      userId = get_jwt_identity()
+      user = UserTable.query.get(userId)
+
+      course = CourseTable.query.get(courseId)
+
+      user.courses.remove(course)
+      db.session.commit()
+
+      return jsonify({'status': 'success'}), 200
+    
+    except Exception as e:
+      return jsonify({'status': str(e)})
 
 
 user.add_url_rule('/',view_func=User.get_user, methods=['GET'])
 user.add_url_rule('/course',view_func=User.add_course_to_user, methods=['POST'])
 user.add_url_rule('/auth', view_func=User.send_auth_email, methods=['POST'])
 user.add_url_rule('/auth/code',view_func=User.check_auth_code, methods=['POST'])
-
-
+user.add_url_rule('/course', view_func=User.remove_user_course, methods=["DELETE"])
