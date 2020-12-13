@@ -54,7 +54,7 @@ class User():
       })
 
       def deleteCode(email):
-        next(codeList.remove(item) for item in codeList if item["email"] == email)
+        codeList = [item for item in codeList if item['email'] != email]
 
       timer = Timer(current_app.config['TIME_AUTH_CODE_IS_VALID'], deleteCode, [email])
       timer.start()
