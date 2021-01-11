@@ -2,17 +2,23 @@ import requests
 
 from flask import current_app
 from models import Course
+import time
 
 def get_answers(question, course_id, n_top):
-    return [
+    # for testing wihtout model connection
+    time.sleep(3)
+    sample_answers =  [
         {
-            'message': 'sample answer'
+            'message': 'sample answer1'
         },
         {
-            'message:' 'sample answer2 long Lorem Ipsum has been the industry"s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting'
+            'message': 'sample answer2 long Lorem Ipsum has been the industry"s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting'
         }
-
     ]
+    print(sample_answers)
+    return sample_answers
+    # end testing block #
+
     course = Course.query.get(course_id)
    # doc_model = course.faq_model_id
    # faq_model = course.doc_model_id
