@@ -9,6 +9,7 @@ from models import Course, Teacher, User, CourseQuestion, TeacherCourse
 from models import Course as CourseTable, CourseScheme
 from models import CourseMaterial, CourseMaterialScheme
 from models import CourseQuestionScheme, CourseQuestionAnswerScheme
+import utils
 
 course_materials = Blueprint('course-materials', __name__, url_prefix='/course-materials')
 
@@ -64,11 +65,16 @@ class CourseMaterials():
                 if not os.path.exists(dir):
                     os.makedirs(dir)
 
-                file.save(os.path.join(dir, filename))
+                file_loc = os.path.join(dir, filename)
+                file.save(file_loc)
                 file_db = CourseMaterial(filename=filename, course_id=int(course_id))
                 db.session.add(file_db)
                 db.session.commit()
                 added_files.append(filename)
+
+                # upload to API
+                utils.upload_file(file_loc)
+                
 
         return jsonify({
             'filenames': added_files,

@@ -3,7 +3,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from models import Message as MessageTable, User as UserTable, MessageScheme
 from server import db
-
+from utils import get_answers
 
 messages = Blueprint('messages', __name__, url_prefix='/messages')
 
@@ -35,19 +35,26 @@ class Message():
     try:
       message = request.json['message']
       course_id = request.json['course_id']
-
-      sender_id = get_jwt_identity()
-      receiver_id = current_app.config['CHATBOT_ID']
+      user_id = get_jwt_identity()
+      bot_id = current_app.config['CHATBOT_ID']
       
-      newMessage = MessageTable(sender_id=sender_id, course_id=course_id, receiver_id=receiver_id, message=message)
-
-      db.session.add(newMessage)   
-      db.session.commit()
-
       message_schema = MessageScheme()
-      data = message_schema.dump(newMessage)
+      input_message = MessageTable(sender_id=user_id, course_id=course_id, receiver_id=bot_id, message=message)
+      db.session.add(input_message)   
+      db.session.commit()
+      new_messages = [message_schema.dump(input_message)]
 
-      return jsonify({"status" : "success", "message": data}), 200
+      answers = get_answers(message, course_id, 1)
+
+      for answer in answers:
+        answer_message = MessageTable(sender_id=bot_id, course_id=course_id, receiver_id=user_id, message=answer['message'])
+        new_messages.append(message_schema.dump(answer_message))
+
+        db.session.add(answer_message)
+        db.session.commit()
+
+
+      return jsonify({"status" : "success", "messages": new_messages}), 200
     
     except Exception as e:
       return str(e), 400

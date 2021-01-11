@@ -46,6 +46,8 @@ class Course(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	code = db.Column(db.String(10), nullable=False)
 	course_name = db.Column(db.String(50), nullable=False)
+	faq_model_id = db.Column(db.String(50), nullable=True)
+	doc_model_id = db.Column(db.String(50), nullable=True)
 
 	#users = db.relationship("UserCourse",  back_populates="course")
 	#teachers = db.relationship("TeacherCourse", back_populates="courses")
@@ -113,16 +115,6 @@ class Message(db.Model):
 
 	def __repr__(self):
 		return f"Message[course_id]({self.course_id})"
-
-
-class QAModel(db.Model):
-	__tablename__ = 'qa_model'
-	id = db.Column(db.Integer, primary_key=True)
-	course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
-	model_id = db.Column(db.String(100), nullable=False)
-	model_type = db.Column(db.String(1000), nullable=False)
-
-	course = db.relationship("Course", backref="models")
 
 #schemes
 from server import marshmallow
