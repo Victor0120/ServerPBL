@@ -68,7 +68,7 @@ class QuestionAnswer():
   def get_question_answers(course_id):
       qa_scheme = CourseQuestionAnswerScheme()
       question_answers = CourseQuestionAnswer.query.filter_by(course_id=course_id).all()
-      question_answers = qa_scheme.dump(quesiton_answers, many=True)
+      question_answers = qa_scheme.dump(question_answers, many=True)
 
       return jsonify({'question_answers': question_answers}), 200
 
