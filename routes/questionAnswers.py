@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required
 
 from server import db
-from models import CourseQuestionAnswer, CourseQuestion
+from models import CourseQuestionAnswer, CourseQuestion, CourseQuestionAnswerScheme
 
 question_answer = Blueprint('question', __name__, url_prefix='/question-answer')
 
@@ -63,6 +63,17 @@ class QuestionAnswer():
 
     return jsonify({"status" : "success"}), 200
 
+
+  @jwt_required
+  def get_question_answers(course_id):
+      qa_scheme = CourseQuestionAnswerScheme()
+      question_answers = CourseQuestionAnswer.query.filter_by(course_id=course_id).all()
+      question_answers = qa_scheme.dump(quesiton_answers, many=True)
+
+      return jsonify({'question_answers': question_answers}), 200
+
+
 question_answer.add_url_rule('/answer/', view_func=QuestionAnswer.post_answer, methods=['POST'])
 question_answer.add_url_rule('/', view_func=QuestionAnswer.post_question_and_answer, methods=['POST'])
 question_answer.add_url_rule('/', view_func=QuestionAnswer.delete_question_answer, methods=['DELETE'])
+question_answer.add_url_rule('/<int:course_id>', view_func=QuestionAnswer.get_question_answers, methods=['GET'])

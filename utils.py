@@ -101,32 +101,35 @@ def highlight_pdf(course_id, filename, context, answer):
     
 
 def upload_file(course_id, file_loc):
-    model_id = 'doc_qa245864938385'
+    course = Course.query.get(course_id)
+    model_id = course.doc_model_id
 
     files = {'file': open(file_loc, 'rb')}
     data =  {'model_id': model_id}
-    url = current_app.config['MODEL_ENDPOINT'] + 'models/doc-qa'
+    url = current_app.config['QA_API_BASE_URL'] + 'models/doc-qa'
     
-    r.requests.post(url, files=files)
+    r = requests.post(url, files=files, data=data)
+    print("request:", r)
+    print(r.status_code)
 
-    return r.status_code == 200
+    return r.ok
 
 
 def delete_file_from_api(filename, course_id):
     course = Course.query.get(course_id)
     model_id = course.faq_model_id
 
-    url = current_app.config['MODEL_ENDPOINT'] + 'models/doc-qa'
+    url = current_app.config['QA_API_BASE_URL'] + 'models/doc-qa'
     r = requests.delete(url, json={'model_id': model_id, 'filename': filename})
 
-    return r.status_code == 200
+    return r.ok
 
 
 def delete_question_answer_from_api(question, answer, course_id):
     course = Course.query.get(course_id)
     model_id = course.doc_model_id
 
-    url = current_app.config['MODEL_ENDPOINT'] + 'models/faq-qa'
+    url = current_app.config['QA_API_BASE_URL'] + 'models/faq-qa'
     r = requests.delete(url, json={'model_id': model_id, 'question': question, 'answer': answer})
 
-    return r.status_code == 200
+    return r.ok

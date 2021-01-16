@@ -72,7 +72,7 @@ class CourseMaterials():
                 db.session.commit()
 
                 # upload to API
-                if not utils.upload_file(file_loc):
+                if not utils.upload_file(course_id, file_loc):
                     os.remove(file_loc)
                     continue
 
