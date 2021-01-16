@@ -95,8 +95,8 @@ class CourseMaterials():
         if (not teacher):
             return "Forbidden", 403
 
-        filename = request.json['filename']
-        course_id = request.json['course_id']
+        filename = request.args.get('filename')
+        course_id = request.args.get('course_id')
 
         # remove processed file from api
         if (not utils.delete_file_from_api(filename, course_id)):
