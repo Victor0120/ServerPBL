@@ -114,5 +114,24 @@ class CourseMaterials():
         return jsonify({"status" : "success"}), 200
 
 
+    @jwt_required
+    def getFiles(course_id):
+        course_material_scheme = CourseMaterialScheme()
+        file_objects = CourseMaterial.query.filter_by(course_id=course_id).all()
+        files = []
+
+        for file_obj in file_objects:
+            file = {}
+            file['filename'] = file_obj.filename
+            file['path'] = f'http://127.0.0.1:5000/static/course/materials/{course_id}/{file_obj.filename}'
+
+            files.append(file)
+
+        return jsonify({'files': files}), 200
+
+
+
+
 course_materials.add_url_rule('/', view_func=CourseMaterials.uploadFiles, methods=['POST'])  
 course_materials.add_url_rule('/', view_func=CourseMaterials.deleteFile, methods=['DELETE'])
+course_materials.add_url_rule('/<int:course_id>', view_func=CourseMaterials.getFiles, methods=['GET'])
