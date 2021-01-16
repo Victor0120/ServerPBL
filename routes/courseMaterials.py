@@ -70,10 +70,14 @@ class CourseMaterials():
                 file_db = CourseMaterial(filename=filename, course_id=int(course_id))
                 db.session.add(file_db)
                 db.session.commit()
-                added_files.append(filename)
 
                 # upload to API
-                utils.upload_file(file_loc)
+                if not utils.upload_file(file_loc):
+                    os.remove(file_loc)
+                    continue
+                
+                added_files.append(filename)
+
                 
 
         return jsonify({
@@ -95,7 +99,7 @@ class CourseMaterials():
         course_id = request.json['course_id']
 
         # remove processed file from api
-        if (not utils.delete_file_api(filename, course_id))
+        if (not utils.delete_file_from_api(filename, course_id))
             return 'Error while deleting file', 400
 
         # remove file from static storage

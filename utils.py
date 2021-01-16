@@ -69,3 +69,24 @@ def upload_file(course_id, file_loc):
     url = current_app.config['MODEL_ENDPOINT'] + 'models/doc-qa'
     
     r.requests.post(url, files=files)
+    return r.status_code == 200
+
+
+def delete_file_from_api(filename, course_id):
+    course = Course.query.get(course_id)
+    model_id = course.faq_model_id
+
+    url = current_app.config['MODEL_ENDPOINT'] + 'models/doc-qa'
+    r = requests.delete(url, json={'model_id': model_id, 'filename': filename})
+
+    return r.status_code == 200
+
+
+def delete_question_answer(question, answer, course_id):
+    course = Course.query.get(course_id)
+    model_id = course.doc_model_id
+
+    url = current_app.config['MODEL_ENDPOINT'] + 'models/faq-qa'
+    r = requests.delete(url, json={'model_id': model_id, 'question': question, 'answer': answer})
+
+    return r.status_code == 200
