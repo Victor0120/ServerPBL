@@ -81,4 +81,33 @@ class CourseMaterials():
             'status':  "not saved" if len(added_files) == 0 else 'success'
             })
 
+
+    @jwt_required
+    def deleteFile():
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        teacher = user.teacher
+
+        if (not teacher):
+            return "Forbidden", 403
+
+        filename = request.json['filename']
+        course_id = request.json['course_id']
+
+        # remove processed file from api
+        if (not utils.delete_file_api(filename, course_id))
+            return 'Error while deleting file', 400
+
+        # remove file from static storage
+        file_loc = os.path.join('static', 'course', 'materials', course_id, filename)
+        os.remove(file_loc)
+
+        # remove file record from db
+        material = db.session.query(CourseMaterial).filter_by(filename=filename, course_id=course_id).first()
+        db.session.delete(material)
+        db.session.commit()
+
+        return jsonify({"status" : "success"}), 200
+
+
 course_materials.add_url_rule('/', view_func=CourseMaterials.uploadFiles, methods=['POST'])  
