@@ -75,7 +75,7 @@ class CourseMaterials():
                 if not utils.upload_file(file_loc):
                     os.remove(file_loc)
                     continue
-                
+
                 added_files.append(filename)
 
                 
@@ -99,7 +99,7 @@ class CourseMaterials():
         course_id = request.json['course_id']
 
         # remove processed file from api
-        if (not utils.delete_file_from_api(filename, course_id))
+        if (not utils.delete_file_from_api(filename, course_id)):
             return 'Error while deleting file', 400
 
         # remove file from static storage
