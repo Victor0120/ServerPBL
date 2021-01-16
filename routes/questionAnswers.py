@@ -46,5 +46,23 @@ class QuestionAnswer():
       except Exception as e:
           return str(e), 400
 
+  @jwt_required
+  def delete_question_answer():
+    course_id = request.json['course_id']
+    question = request.json['question']
+    answer = request.json['answer']
+
+    # remove processed file from api
+    if (not utils.delete_question_answer(question, answer, course_id))
+        return 'Error while deleting question/answer', 400
+        
+    # remove qa from db
+    course_qa = db.session.query(CourseQuestionAnswer).filter_by(course_id=course_id, question=question, answer=answer).first()
+    db.session.delete(course_qa)
+    db.session.commit()
+
+    return jsonify({"status" : "success"}), 200
+
 question_answer.add_url_rule('/answer/', view_func=QuestionAnswer.post_answer, methods=['POST'])
 question_answer.add_url_rule('/', view_func=QuestionAnswer.post_question_and_answer, methods=['POST'])
+question_answer.add_url_rule('/', view_func=QuestionAnswer.delete_question_answer, methods=['DELETE'])

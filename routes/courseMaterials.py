@@ -111,3 +111,4 @@ class CourseMaterials():
 
 
 course_materials.add_url_rule('/', view_func=CourseMaterials.uploadFiles, methods=['POST'])  
+course_materials.add_url_rule('/', view_func=CourseMaterials.deleteFile, methods=['DELETE'])
