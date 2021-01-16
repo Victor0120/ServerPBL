@@ -63,7 +63,7 @@ def get_answers(question, course_id, n_top):
         file_loc = highlight_pdf(course_id, filename, 'context', answer_text)
 
         answer = {
-            'message': answer_text
+            'message': answer_text,
             'doc_path': file_loc
         }
 

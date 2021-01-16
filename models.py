@@ -81,6 +81,7 @@ class CourseQuestionAnswer(db.Model):
 	course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
 	question = db.Column(db.String(1000), nullable=False)
 	answer = db.Column(db.String(1000), nullable=False)
+	doc_path = db.Column(db.String(1000), nullable=True)
 
 	course = db.relationship("Course", back_populates="course_question_answers")
 
