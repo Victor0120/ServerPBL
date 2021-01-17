@@ -41,6 +41,11 @@ class QuestionAnswer():
         db.session.add(course_question_answer)
         db.session.commit()
 
+        try:
+          utils.add_question_answer_to_api(question, answer, course_question_answer.id)
+        except:
+          return 'Error while uploading question answer to api', 400
+
         return jsonify({'status': 'success'}), 200  #TODO return the posted answer
         
       except Exception as e:
@@ -53,11 +58,11 @@ class QuestionAnswer():
     course_qa = db.session.query(CourseQuestionAnswer).get(question_answer_id)
     course_id = course_qa.course_id
 
-    # # remove processed file from api
-    # try:
-    #   utils.delete_question_answer_from_api(question_answer_id, course_id)
-    # except requests.exceptions.RequestException as err:
-    #   return 'Error while deleting question/answer', 400
+      # # remove processed file from api
+      # try:
+      #   utils.delete_question_answer_from_api(question_answer_id, course_id)
+      # except requests.exceptions.RequestException as err:
+      #   return 'Error while deleting question/answer', 400
         
     # remove qa from db
     db.session.delete(course_qa)

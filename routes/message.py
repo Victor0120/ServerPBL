@@ -35,20 +35,22 @@ class Message():
     try:
       message = request.json['message']
       course_id = request.json['course_id']
+      n_answers_top = request.json['n_answers_top']
       user_id = get_jwt_identity()
       bot_id = current_app.config['CHATBOT_ID']
+      
       
       message_schema = MessageScheme()
       input_message = MessageTable(sender_id=user_id, course_id=course_id, receiver_id=bot_id, message=message)
       db.session.add(input_message)   
       db.session.commit()
       
-      answers = get_answers(message, course_id, 1)
+      answers = get_answers(message, course_id, n_answers_top)
 
       if not answers:
         answers.append({'message': "Sorry, we couldn't find an answer to your question"})
       new_messages = []
-      
+
 
       for answer in answers:
         answer_message = MessageTable(sender_id=bot_id, course_id=course_id, 

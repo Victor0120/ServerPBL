@@ -140,6 +140,19 @@ def upload_file(course_id, file_loc):
         r.raise_for_status()
 
 
+def add_question_answer_to_api(question, answer, question_answer_id):
+    course = Course.query.get(course_id)
+    model_id = course.faq_model_id
+
+    url = 'http://localhost:8000/models/faq-qa/'
+    data = {
+        'model_id': model_id
+    }
+
+    r = requests.post(url, files=files, data=data)
+    r.raise_for_status()
+
+
 def delete_file_from_api(filename, course_id):
     course = Course.query.get(course_id)
     model_id = course.doc_model_id
