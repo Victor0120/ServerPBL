@@ -48,7 +48,7 @@ class QuestionAnswer():
 
   @jwt_required
   def delete_question_answer():
-    question_answer_id = request.json['question_answer_id']
+    question_answer_id = request.args.get('question_answer_id')
 
     course_qa = db.session.query(CourseQuestionAnswer).get(question_answer_id)
     course_id = course_qa.course_id
