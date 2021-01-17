@@ -179,4 +179,5 @@ class MessageScheme(marshmallow.SQLAlchemySchema):
 	sender_id = marshmallow.auto_field()
 	created_on = marshmallow.auto_field()
 	message = marshmallow.auto_field()
+	doc_path = marshmallow.auto_field()
 
