@@ -44,7 +44,11 @@ class Message():
       db.session.commit()
       
       answers = get_answers(message, course_id, 1)
+
+      if not answers:
+        answers.append({'message': "Sorry, we couldn't find an answer to your question"})
       new_messages = []
+      
 
       for answer in answers:
         answer_message = MessageTable(sender_id=bot_id, course_id=course_id, 
