@@ -48,18 +48,18 @@ class QuestionAnswer():
 
   @jwt_required
   def delete_question_answer():
-    course_id = request.json['course_id']
-    question = request.json['question']
-    answer = request.json['answer']
+    question_answer_id = request.json['question_answer_id']
 
-    # remove processed file from api
-    try:
-      utils.delete_question_answer_from_api(question, answer, course_id)
-    except requests.exceptions.RequestException as err:
-      return 'Error while deleting question/answer', 400
+    course_qa = db.session.query(CourseQuestionAnswer).get(question_answer_id)
+    course_id = course_qa.course_id
+
+    # # remove processed file from api
+    # try:
+    #   utils.delete_question_answer_from_api(question_answer_id, course_id)
+    # except requests.exceptions.RequestException as err:
+    #   return 'Error while deleting question/answer', 400
         
     # remove qa from db
-    course_qa = db.session.query(CourseQuestionAnswer).filter_by(course_id=course_id, question=question, answer=answer).first()
     db.session.delete(course_qa)
     db.session.commit()
 

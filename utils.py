@@ -9,19 +9,19 @@ import os
 
 def get_answers(question, course_id, n_top):
     # for testing wihtout model connection
-    time.sleep(3)
-    sample_answers =  [
-        {
-            'message': 'sample answer1'
-        },
-        {
-            'message': 'sample answer2 long Lorem Ipsum has been the industry"s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting'
-        },
-        {
-            'message': 'message with document',
-            'doc_path': 'http://localhost:5000/static/course/temp/1/6.1-TheDataLinkLayer.pdf'
-        }
-    ]
+    # time.sleep(3)
+    # sample_answers =  [
+    #     {
+    #         'message': 'sample answer1'
+    #     },
+    #     {
+    #         'message': 'sample answer2 long Lorem Ipsum has been the industry"s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting'
+    #     },
+    #     {
+    #         'message': 'message with document',
+    #         'doc_path': 'http://localhost:5000/static/course/temp/1/6.1-TheDataLinkLayer.pdf'
+    #     }
+    # ]
     #return sample_answers
     # end testing block #
 
@@ -56,6 +56,7 @@ def get_answers(question, course_id, n_top):
     if doc_url:
         json_data['model_id'] = doc_model_id
         r = requests.post(url=doc_url, json=json_data).json()
+        print(r[0]['answers'])
         answers.extend([answer for answer in r[0]['answers'] if answer['probability'] > 0.54])
         
     sorted_answers = sorted(answers, key=lambda k: k['probability'])
@@ -148,10 +149,10 @@ def delete_file_from_api(filename, course_id):
     r.raise_for_status()
 
 
-def delete_question_answer_from_api(question, answer, course_id):
+def delete_question_answer_from_api(question_answer_id, course_id):
     course = Course.query.get(course_id)
     model_id = course.faq_model_id
 
     url = current_app.config['QA_API_BASE_URL'] + 'models/faq-qa'
-    r = requests.delete(url, params={'model_id': model_id, 'question': question, 'answer': answer})
+    r = requests.delete(url, params={'model_id': model_id, 'question_answer_id': question_answer_id})
     r.raise_for_status()

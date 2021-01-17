@@ -30,13 +30,12 @@ class Message():
 
     return jsonify({'messages': data})
   
-  #@jwt_required
+  @jwt_required
   def post_user_message():
     try:
       message = request.json['message']
       course_id = request.json['course_id']
-      #user_id = get_jwt_identity()
-      user_id=123
+      user_id = get_jwt_identity()
       bot_id = current_app.config['CHATBOT_ID']
       
       message_schema = MessageScheme()
