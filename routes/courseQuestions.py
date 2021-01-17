@@ -13,7 +13,6 @@ class CourseQuestions():
   @jwt_required
   def post_question():
     user_id = get_jwt_identity()
-    user_id=1
     message = request.json['message']
     course_id = request.json['course_id']
     
@@ -23,7 +22,7 @@ class CourseQuestions():
     db.session.commit()
 
     return jsonify({"status" : "success"}), 200
-    
+
 
 course_questions.add_url_rule('/', view_func=CourseQuestions.post_question, methods=['POST'])
 

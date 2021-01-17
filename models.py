@@ -81,7 +81,6 @@ class CourseQuestionAnswer(db.Model):
 	course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
 	question = db.Column(db.String(1000), nullable=False)
 	answer = db.Column(db.String(1000), nullable=False)
-	doc_path = db.Column(db.String(1000), nullable=True)
 
 	course = db.relationship("Course", back_populates="course_question_answers")
 
@@ -109,6 +108,7 @@ class Message(db.Model):
 	sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	created_on = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
 	message = db.Column(db.String(1000), nullable=False)
+	doc_path = db.Column(db.String(1000), nullable=True)
 
 	sender = db.relationship("User", backref="sent_messages", foreign_keys=[sender_id])
 	receiver = db.relationship("User", backref="received_messages", foreign_keys=[receiver_id])

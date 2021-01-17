@@ -15,6 +15,10 @@ def get_answers(question, course_id, n_top):
         },
         {
             'message': 'sample answer2 long Lorem Ipsum has been the industry"s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting'
+        },
+        {
+            'message': 'message with document',
+            'doc_path': 'http://localhost:5000/static/course/temp/1/6.1-TheDataLinkLayer.pdf'
         }
     ]
     print(sample_answers)
@@ -104,9 +108,15 @@ def upload_file(course_id, file_loc):
     course = Course.query.get(course_id)
     model_id = course.doc_model_id
 
+
     files = {'file': open(file_loc, 'rb')}
     data =  {'model_id': model_id}
-    url = current_app.config['QA_API_BASE_URL'] + 'models/doc-qa'
+    #url = 'http://localhost:8000/send-file'
+
+    url = 'http://localhost:8000/models/doc-qa/'
+
+    #print(open(file_loc), 'rb')
+    #print(requests.Request('POST', url, files=files).prepare().body)
     
     r = requests.post(url, files=files, data=data)
     print("request:", r)
@@ -120,7 +130,7 @@ def delete_file_from_api(filename, course_id):
     model_id = course.faq_model_id
 
     url = current_app.config['QA_API_BASE_URL'] + 'models/doc-qa'
-    r = requests.delete(url, json={'model_id': model_id, 'filename': filename})
+    r = requests.delete(url, params={'model_id': model_id, 'filename': filename})
 
     return r.ok
 
@@ -130,6 +140,6 @@ def delete_question_answer_from_api(question, answer, course_id):
     model_id = course.doc_model_id
 
     url = current_app.config['QA_API_BASE_URL'] + 'models/faq-qa'
-    r = requests.delete(url, json={'model_id': model_id, 'question': question, 'answer': answer})
+    r = requests.delete(url, params={'model_id': model_id, 'question': question, 'answer': answer})
 
     return r.ok

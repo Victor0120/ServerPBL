@@ -72,8 +72,21 @@ class QuestionAnswer():
 
       return jsonify({'question_answers': question_answers}), 200
 
+  
+  #@jwt_required
+  def modify_answer():
+    question_answer_id = request.json['question_answer_id']
+    new_answer = request.json['new_answer']
+
+    question_answer = CourseQuestionAnswer.query.get(question_answer_id)
+    question_answer.answer = new_answer
+    db.session.commit()
+
+    return jsonify({'status': 'success'}), 200
+
 
 question_answer.add_url_rule('/answer/', view_func=QuestionAnswer.post_answer, methods=['POST'])
 question_answer.add_url_rule('/', view_func=QuestionAnswer.post_question_and_answer, methods=['POST'])
+question_answer.add_url_rule('/', view_func=QuestionAnswer.modify_answer, methods=['PUT'])
 question_answer.add_url_rule('/', view_func=QuestionAnswer.delete_question_answer, methods=['DELETE'])
 question_answer.add_url_rule('/<int:course_id>', view_func=QuestionAnswer.get_question_answers, methods=['GET'])
