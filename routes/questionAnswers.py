@@ -53,8 +53,10 @@ class QuestionAnswer():
     answer = request.json['answer']
 
     # remove processed file from api
-    if (not utils.delete_question_answer_from_api(question, answer, course_id)):
-        return 'Error while deleting question/answer', 400
+    try:
+      utils.delete_question_answer_from_api(question, answer, course_id)
+    except requests.exceptions.RequestException as err:
+      return 'Error while deleting question/answer', 400
         
     # remove qa from db
     course_qa = db.session.query(CourseQuestionAnswer).filter_by(course_id=course_id, question=question, answer=answer).first()

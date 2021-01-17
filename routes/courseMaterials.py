@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, current_app as app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_cors import cross_origin
 from werkzeug.utils import secure_filename
-import os, itertools
+import os, itertools, requests
 
 from models import db
 from models import Course, Teacher, User, CourseQuestion, TeacherCourse
@@ -67,18 +67,19 @@ class CourseMaterials():
 
                 file_loc = os.path.join(dir, filename)
                 file.save(file_loc)
-                file_db = CourseMaterial(filename=filename, course_id=int(course_id))
-                db.session.add(file_db)
-                db.session.commit()
-
-                # upload to API
-                if not utils.upload_file(course_id, file_loc):
-                    os.remove(file_loc)
-                    continue
-
-                added_files.append(filename)
-
                 
+                # upload to API & save record to db
+                try:
+                    utils.upload_file(course_id, file_loc)
+
+                    file_db = CourseMaterial(filename=filename, course_id=int(course_id))
+                    db.session.add(file_db)
+                    db.session.commit()
+                    added_files.append(filename)
+                except requests.exceptions.RequestException as err:
+                    os.remove(file_loc)
+                    db.session.rollback()
+
 
         return jsonify({
             'filenames': added_files,
@@ -99,7 +100,9 @@ class CourseMaterials():
         course_id = request.args.get('course_id')
 
         # remove processed file from api
-        if (not utils.delete_file_from_api(filename, course_id)):
+        try:
+            utils.delete_file_from_api(filename, course_id)
+        except requests.exceptions.RequestException as err:
             return 'Error while deleting file', 400
 
         # remove file from static storage

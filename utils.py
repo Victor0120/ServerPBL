@@ -5,6 +5,7 @@ from models import Course
 import time
 import fitz
 import uuid
+import os
 
 def get_answers(question, course_id, n_top):
     # for testing wihtout model connection
@@ -21,27 +22,25 @@ def get_answers(question, course_id, n_top):
             'doc_path': 'http://localhost:5000/static/course/temp/1/6.1-TheDataLinkLayer.pdf'
         }
     ]
-    print(sample_answers)
-    return sample_answers
+    #return sample_answers
     # end testing block #
 
     course = Course.query.get(course_id)
-   # doc_model = course.faq_model_id
-   # faq_model = course.doc_model_id
-    faq_model_id = 'faq_qa497842236550'
-    doc_model_id = 'doc_qa245864938385'
+    doc_model_id = course.doc_model_id
+    faq_model_id = course.doc_model_id
 
-    doc_url = current_app.config['QA_API_BASE_URL'] + f'models/doc-qa/{doc_model_id}/questions' 
-    faq_url = current_app.config['QA_API_BASE_URL'] + f'models/faq-qa/{faq_model_id}/questions'
+    doc_url = current_app.config['QA_API_BASE_URL'] + f'models/doc-qa/questions' 
+    faq_url = current_app.config['QA_API_BASE_URL'] + f'models/faq-qa/questions'
 
     json_data = {
         "questions": [question],
-        "top_k_reader": n_top
+        "top_k_reader": n_top,
     }
 
     answers = []
     
     if faq_url:
+        json_data['model_id'] = faq_model_id
         r = requests.post(url=faq_url, json=json_data).json()
 
         if len(r[0]['answers']):
@@ -55,20 +54,22 @@ def get_answers(question, course_id, n_top):
                 return answers
 
     if doc_url:
+        json_data['model_id'] = doc_model_id
         r = requests.post(url=doc_url, json=json_data).json()
-        answers.extend([answer for answer in r[0]['answers'] if answer['probability'] > 0.5])
+        answers.extend([answer for answer in r[0]['answers'] if answer['probability'] > 0.54])
         
     sorted_answers = sorted(answers, key=lambda k: k['probability'])
     clean_answers = []
 
     for i in range(min(n_top, len(sorted_answers))):
         answer_text = sorted_answers[i]['answer']
+        answer_context = sorted_answers[i]['context']
         filename = sorted_answers[i]['meta'].get('name', '') # or link for faq
-        file_loc = highlight_pdf(course_id, filename, 'context', answer_text)
+        file_loc = highlight_pdf(course_id, filename, answer_context, answer_text)
 
         answer = {
             'message': answer_text,
-            'doc_path': file_loc
+            'doc_path': current_app.config['BASE_URL'] + '/' + file_loc
         }
 
         clean_answers.append(answer)
@@ -79,28 +80,49 @@ def get_answers(question, course_id, n_top):
 
 
 def highlight_pdf(course_id, filename, context, answer):
-    dir_loc = os.path.join('static', 'course', 'materials', course_id)
+    dir_loc = os.path.join('static', 'course', 'materials', str(course_id))
     file_loc = os.path.join(dir_loc, filename)
     doc = fitz.open(file_loc)
 
-    for page in doc:
-        for inst in page.searchFor(context):
-            highlight = page.addHighlightAnnot(inst)
+    highlight_count = 0
+    highlight_page  = 1
 
-        for inst in page.searchFor(answer):
+    for i, page in enumerate(doc, 1):
+        y_min = 100000
+        y_max = 0
+
+        for inst in page.searchFor(context):
+            y_min = min(y_min, inst.y0)
+            y_max = max(y_max, inst.y1)
+
             highlight = page.addHighlightAnnot(inst)
-            highlight.setColors({"stroke": (1, 0.58, 0.19), "fill": (0.75, 0.8, 0.95)})
+            highlight.setColors({"stroke": (1, 1, 0.91), "fill": (0.75, 0.8, 0.95)})
             highlight.update()
 
-    out_dir_loc = os.path.join('static', 'course', 'temp_files', course_id)
-    out_file_loc = os.path.join(out_dir_loc, filename)
 
-    if not os.path.exists('out_dir_loc'):
-        os.makedirs('out_dir_loc')
+        for inst in page.searchFor(answer):
+            # skip if answer rectangle outside context
+            if inst.y0 > y_max or inst.y0 < y_min or inst.y1 > y_max or inst.y0 < y_min:
+                continue
+
+            highlight = page.addHighlightAnnot(inst)
+            highlight_page = i
+            highlight_count += 1
+
+    if highlight_count == 0:
+        for page in doc:
+            for inst in page.searchFor(answer):
+                highlight = page.addHighlightAnnot(inst)
+
+    out_dir_loc = os.path.join('static', 'course', 'temp_files', str(course_id))
+    out_file_loc = os.path.join(out_dir_loc, str(uuid.uuid4()) + filename)
+
+    if not os.path.exists(out_dir_loc):
+        os.makedirs(out_dir_loc)
 
     doc.save(out_file_loc, garbage=4, deflate=True, clean=True)
 
-    return out_file_loc
+    return out_file_loc + f"#page={highlight_page}"
 
     
 
@@ -108,38 +130,28 @@ def upload_file(course_id, file_loc):
     course = Course.query.get(course_id)
     model_id = course.doc_model_id
 
-
-    files = {'file': open(file_loc, 'rb')}
-    data =  {'model_id': model_id}
-    #url = 'http://localhost:8000/send-file'
-
-    url = 'http://localhost:8000/models/doc-qa/'
-
-    #print(open(file_loc), 'rb')
-    #print(requests.Request('POST', url, files=files).prepare().body)
-    
-    r = requests.post(url, files=files, data=data)
-    print("request:", r)
-    print(r.status_code)
-
-    return r.ok
+    with open(file_loc, 'rb') as f:
+        files = {'file': f}
+        data =  {'model_id': model_id}
+        url = 'http://localhost:8000/models/doc-qa/'
+        
+        r = requests.post(url, files=files, data=data)
+        r.raise_for_status()
 
 
 def delete_file_from_api(filename, course_id):
     course = Course.query.get(course_id)
-    model_id = course.faq_model_id
+    model_id = course.doc_model_id
 
     url = current_app.config['QA_API_BASE_URL'] + 'models/doc-qa'
     r = requests.delete(url, params={'model_id': model_id, 'filename': filename})
-
-    return r.ok
+    r.raise_for_status()
 
 
 def delete_question_answer_from_api(question, answer, course_id):
     course = Course.query.get(course_id)
-    model_id = course.doc_model_id
+    model_id = course.faq_model_id
 
     url = current_app.config['QA_API_BASE_URL'] + 'models/faq-qa'
     r = requests.delete(url, params={'model_id': model_id, 'question': question, 'answer': answer})
-
-    return r.ok
+    r.raise_for_status()
