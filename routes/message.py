@@ -45,9 +45,11 @@ class Message():
       
       answers = get_answers(message, course_id, 1)
       new_messages = []
-      
+
       for answer in answers:
-        answer_message = MessageTable(sender_id=bot_id, course_id=course_id, receiver_id=user_id, message=answer['message'])
+        answer_message = MessageTable(sender_id=bot_id, course_id=course_id, 
+            receiver_id=user_id, message=answer['message'], doc_path=answer.get('doc_path', None))
+
         new_messages.append(message_schema.dump(answer_message))
 
         db.session.add(answer_message)
