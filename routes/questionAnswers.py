@@ -26,6 +26,7 @@ class QuestionAnswer():
 
         if question_object:
             db.session.delete(question_object)
+            db.session.commit()
 
         try:
           utils.add_question_answer_to_api(question, answer, course_question_answer.id, course_id)
