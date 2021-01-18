@@ -27,14 +27,15 @@ def get_answers(question, course_id, n_top):
 
     course = Course.query.get(course_id)
     doc_model_id = course.doc_model_id
-    faq_model_id = course.doc_model_id
+    faq_model_id = course.faq_model_id
 
-    doc_url = current_app.config['QA_API_BASE_URL'] + f'models/doc-qa/questions' 
-    faq_url = current_app.config['QA_API_BASE_URL'] + f'models/faq-qa/questions'
+    doc_url = current_app.config['QA_API_BASE_URL'] + f'models/doc-qa/questions/' 
+    faq_url = current_app.config['QA_API_BASE_URL'] + f'models/faq-qa/questions/'
 
     json_data = {
         "questions": [question],
         "top_k_reader": n_top,
+        "top_k_retriever": 7
     }
 
     answers = []
@@ -134,22 +135,36 @@ def upload_file(course_id, file_loc):
     with open(file_loc, 'rb') as f:
         files = {'file': f}
         data =  {'model_id': model_id}
-        url = 'http://localhost:8000/models/doc-qa/'
+        url = current_app.config['DOC_QA_ENDPOINT']
         
         r = requests.post(url, files=files, data=data)
         r.raise_for_status()
 
 
-def add_question_answer_to_api(question, answer, question_answer_id):
+def add_question_answer_to_api(question, answer, question_answer_id, course_id):
     course = Course.query.get(course_id)
     model_id = course.faq_model_id
 
-    url = 'http://localhost:8000/models/faq-qa/'
+    url = current_app.config['FAQ_QA_ENDPOINT']
     data = {
-        'model_id': model_id
+        "model_id": model_id,
+        "question": question,
+        "answer": answer,
+        "question_answer_id": question_answer_id
     }
 
-    r = requests.post(url, files=files, data=data)
+    print(data)
+
+    r = requests.post(url, json=data)
+    r.raise_for_status()
+
+
+def modify_question_answer_from_api(question_answer_id, course_id, new_answer):
+    course = Course.query.get(course_id)
+    model_id = course.faq_model_id
+
+    url = current_app.config['FAQ_QA_ENDPOINT']
+    r = requests.put(url, params={'model_id': model_id, 'question_answer_id': question_answer_id, 'new_answer': new_answer})
     r.raise_for_status()
 
 
@@ -157,7 +172,7 @@ def delete_file_from_api(filename, course_id):
     course = Course.query.get(course_id)
     model_id = course.doc_model_id
 
-    url = current_app.config['QA_API_BASE_URL'] + 'models/doc-qa'
+    url = current_app.config['DOC_QA_ENDPOINT']
     r = requests.delete(url, params={'model_id': model_id, 'filename': filename})
     r.raise_for_status()
 
@@ -166,6 +181,9 @@ def delete_question_answer_from_api(question_answer_id, course_id):
     course = Course.query.get(course_id)
     model_id = course.faq_model_id
 
-    url = current_app.config['QA_API_BASE_URL'] + 'models/faq-qa'
+    url = current_app.config['FAQ_QA_ENDPOINT'] 
+    print({'model_id': model_id, 'question_answer_id': question_answer_id})
     r = requests.delete(url, params={'model_id': model_id, 'question_answer_id': question_answer_id})
+    
     r.raise_for_status()
+
