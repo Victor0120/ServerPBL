@@ -46,6 +46,8 @@ class Course(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	code = db.Column(db.String(10), nullable=False)
 	course_name = db.Column(db.String(50), nullable=False)
+	faq_model_id = db.Column(db.String(50), nullable=True)
+	doc_model_id = db.Column(db.String(50), nullable=True)
 
 	#users = db.relationship("UserCourse",  back_populates="course")
 	#teachers = db.relationship("TeacherCourse", back_populates="courses")
@@ -106,6 +108,7 @@ class Message(db.Model):
 	sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	created_on = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
 	message = db.Column(db.String(1000), nullable=False)
+	doc_path = db.Column(db.String(1000), nullable=True)
 
 	sender = db.relationship("User", backref="sent_messages", foreign_keys=[sender_id])
 	receiver = db.relationship("User", backref="received_messages", foreign_keys=[receiver_id])
@@ -176,4 +179,5 @@ class MessageScheme(marshmallow.SQLAlchemySchema):
 	sender_id = marshmallow.auto_field()
 	created_on = marshmallow.auto_field()
 	message = marshmallow.auto_field()
+	doc_path = marshmallow.auto_field()
 

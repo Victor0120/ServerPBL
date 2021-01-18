@@ -12,3 +12,8 @@ class Config:
 
     CORS_HEADERS = 'Content-Type'
     UPLOAD_MATERIAL_FOLDER_PREFIX = 'static/courses/materials'
+
+    BASE_URL = 'http://localhost:5000/'
+    QA_API_BASE_URL = 'http://localhost:8000/'
+    FAQ_QA_ENDPOINT = 'http://localhost:8000/models/faq-qa/'
+    DOC_QA_ENDPOINT = 'http://localhost:8000/models/doc-qa/'
