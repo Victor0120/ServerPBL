@@ -98,7 +98,7 @@ class QuestionAnswer():
       return jsonify({'question_answers': question_answers}), 200
 
   
-  #@jwt_required
+  @jwt_required
   def modify_answer():
     question_answer_id = request.json['question_answer_id']
     new_answer = request.json['new_answer']
